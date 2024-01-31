@@ -1,5 +1,7 @@
+package Service;
+
 public enum Status {
     NEW,
-    IN_PROGRES,
+    IN_PROGRESS,
     DONE
 }
