@@ -1,6 +1,5 @@
-package Tasks;
+package model;
 
-import Service.Status;
 import java.util.Objects;
 
 public class Task {

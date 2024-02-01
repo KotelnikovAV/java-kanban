@@ -1,8 +1,9 @@
-package Service;
+package service;
 
-import Tasks.Epic;
-import Tasks.Subtask;
-import Tasks.Task;
+import model.Epic;
+import model.Status;
+import model.Subtask;
+import model.Task;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -10,17 +11,13 @@ public class TaskManager {
     private final ArrayList<Task> listTasks;
     private final ArrayList<Epic> listEpics;
     private final ArrayList<Subtask> listSubtasks;
-    private int counterTaskId;
-    private int counterEpicId;
-    private int counterSubtaskId;
+    private int counterId;
 
     public TaskManager() {
         listTasks = new ArrayList<>();
         listEpics = new ArrayList<>();
         listSubtasks = new ArrayList<>();
-        counterTaskId = 0;
-        counterEpicId = 0;
-        counterSubtaskId = 0;
+        counterId = 0;
     }
 
     public void createTask(Status status, Task task) {
@@ -29,8 +26,8 @@ public class TaskManager {
                 return;
             }
         }
-        counterTaskId++;
-        task.setId(counterTaskId);
+        counterId++;
+        task.setId(counterId);
         task.setStatus(status);
         listTasks.add(task);
     }
@@ -41,8 +38,8 @@ public class TaskManager {
                 return;
             }
         }
-        counterEpicId++;
-        epic.setId(counterEpicId);
+        counterId++;
+        epic.setId(counterId);
         epic.setStatus(status);
         listEpics.add(epic);
     }
@@ -53,8 +50,8 @@ public class TaskManager {
                 return;
             }
         }
-        counterSubtaskId++;
-        subtask.setId(counterSubtaskId);
+        counterId++;
+        subtask.setId(counterId);
         subtask.setStatus(status);
         listSubtasks.add(subtask);
         epic.addSubtask(subtask);
@@ -78,14 +75,11 @@ public class TaskManager {
 
     public void removeAllTasks() {
         listTasks.clear();
-        counterTaskId = 0;
     }
 
     public void removeAllEpics() {
         listEpics.clear();
         listSubtasks.clear();
-        counterEpicId = 0;
-        counterSubtaskId = 0;
     }
 
     public void removeAllSubtasks(Epic epic) {
