@@ -1,7 +1,5 @@
 package model;
 
-import java.util.Objects;
-
 public class Task {
     private String task;
     private int id;
@@ -37,11 +35,16 @@ public class Task {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(Object o) { // сделал таким образом, чтобы можно было сравнивать разные типы данных
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Task task1 = (Task) o;
-        return id == task1.id && Objects.equals(task, task1.task);
+        if (o == null) return false;
+        Task task;
+        try {
+            task = (Task) o;
+        } catch (ClassCastException err) {
+            return false;
+        }
+        return id == task.id;
     }
 
     @Override

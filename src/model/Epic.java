@@ -20,11 +20,7 @@ public class Epic extends Task {
 
     @Override
     public String toString() {
-        System.out.println("Эпик: " + getTask() + ". Идентификационный номер эпика: " + getId() + ". Статус задачи: "
-                + getStatus() + ". Список подзадач в данном эпике: ");
-        for (Subtask subtask : subtasks) {
-            System.out.println(subtask.getTask());
-        }
-        return  " ";
+        return "Эпик: " + getTask() + ". Идентификационный номер эпика: " + getId() + ". Статус эпика: "
+                + getStatus() + ".";
     }
 }
