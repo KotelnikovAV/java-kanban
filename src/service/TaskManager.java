@@ -1,7 +1,11 @@
-package model;
+package service;
+
+import model.Epic;
+import model.Status;
+import model.Subtask;
+import model.Task;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 public interface TaskManager {
     void createTask(Status status, Task task);
@@ -46,5 +50,5 @@ public interface TaskManager {
 
     void changeStatusEpic(Status status, Epic epic);
 
-    LinkedList<Task> getHistory();
+    ArrayList<Task> getHistory();
 }

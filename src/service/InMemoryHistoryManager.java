@@ -1,29 +1,27 @@
 package service;
 
-import model.HistoryManager;
 import model.Task;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    private final LinkedList<Task> browsingHistory;
-    // сделал реализацию через LinkedList, так как он лучше работает с добавлением элементов в начало списка
+    private final ArrayList<Task> browsingHistory;
 
     public InMemoryHistoryManager() {
-        browsingHistory = new LinkedList<>();
+        browsingHistory = new ArrayList<>(10);
     }
 
     @Override
     public void add(Task task) {
-        browsingHistory.addFirst(task);
-        if (browsingHistory.size() > 10) {
-            browsingHistory.remove(10);
+        if (browsingHistory.size() == 10) {
+            browsingHistory.remove(0);
         }
+        browsingHistory.add(task);
     }
 
     @Override
-    public LinkedList<Task> getHistory() {
+    public ArrayList<Task> getHistory() {
         return browsingHistory;
     }
 }

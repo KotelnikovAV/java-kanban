@@ -4,20 +4,19 @@ import model.*;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 
 public class InMemoryTaskManager implements TaskManager {
     private final ArrayList<Task> listTasks;
     private final ArrayList<Epic> listEpics;
     private final ArrayList<Subtask> listSubtasks;
-    private final InMemoryHistoryManager inMemoryHistoryManager;
+    private final HistoryManager inMemoryHistoryManager;
     private int counterId;
 
     public InMemoryTaskManager() {
         listTasks = new ArrayList<>();
         listEpics = new ArrayList<>();
         listSubtasks = new ArrayList<>();
-        inMemoryHistoryManager = new InMemoryHistoryManager();
+        inMemoryHistoryManager = Managers.getHistoryManager();
         counterId = 0;
     }
 
@@ -100,6 +99,7 @@ public class InMemoryTaskManager implements TaskManager {
         for (Subtask subtask : subtasksInEpic) {
             listSubtasks.removeIf(subtaskInList -> subtaskInList.equals(subtask));
         }
+        epic.getSubtasks().clear();
     }
 
     @Override
@@ -245,7 +245,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public LinkedList<Task> getHistory() {
+    public ArrayList<Task> getHistory() {
         return inMemoryHistoryManager.getHistory();
     }
 
