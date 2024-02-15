@@ -7,9 +7,11 @@ import java.util.ArrayList;
 public class InMemoryHistoryManager implements HistoryManager {
 
     private final ArrayList<Task> browsingHistory;
+    private ArrayList<Task> copyBrowsingHistory;
+    private static final int SIZE_OF_HISTORY = 10;
 
     public InMemoryHistoryManager() {
-        browsingHistory = new ArrayList<>(10);
+        browsingHistory = new ArrayList<>(SIZE_OF_HISTORY);
     }
 
     @Override
@@ -22,6 +24,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public ArrayList<Task> getHistory() {
-        return browsingHistory;
+        copyBrowsingHistory = new ArrayList<>(browsingHistory);
+        return copyBrowsingHistory;
     }
 }
