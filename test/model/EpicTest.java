@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -12,7 +13,7 @@ class EpicTest {
     public static Epic epic;
     public static Subtask subtask1;
     public static Subtask subtask2;
-    public static ArrayList<Subtask> subtasks;
+    public static List<Subtask> subtasks;
 
     @BeforeAll
     public static void beforeAll() {

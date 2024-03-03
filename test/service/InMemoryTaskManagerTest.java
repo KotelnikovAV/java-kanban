@@ -9,10 +9,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.ArrayList;
+import java.util.List;
 
 class InMemoryTaskManagerTest {
-    // сделал покрытие тестами не всех методов, так как многие методы реализуют похожую логику
     public static TaskManager inMemoryTaskManager;
     public static Task task1;
     public static Task task2;
@@ -43,10 +42,6 @@ class InMemoryTaskManagerTest {
         assertEquals(epic, task1, "Задачи с одинаковыми id не равны");
     }
 
-    /* В ТЗ написано, что необходимо проверить, что объект Epic нельзя добавить в самого себя в виде подзадачи.
-    В моей реализации этого не позволит сделать сам компилятор. То же самое касается и пункта: проверьте,
-    что объект Subtask нельзя сделать своим же эпиком */
-
     @Test
     void checkAddNewTask() {
         inMemoryTaskManager.createTask(Status.NEW, task1);
@@ -56,7 +51,7 @@ class InMemoryTaskManagerTest {
         assertEquals(inMemoryTaskManager.getEpicById(2), epic, "Эпики не совпадают.");
         assertEquals(inMemoryTaskManager.getSubtaskById(3), subtask1, "Подзадачи не совпадают.");
 
-        final ArrayList<Task> tasks = inMemoryTaskManager.getListTasks();
+        final List<Task> tasks = inMemoryTaskManager.getListTasks();
 
         assertNotNull(tasks, "Задачи не возвращаются.");
         assertEquals(1, tasks.size(), "Неверное количество задач.");
@@ -151,5 +146,14 @@ class InMemoryTaskManagerTest {
         inMemoryTaskManager.getTaskById(2);
         assertNotNull(inMemoryTaskManager.getHistory());
         assertEquals(inMemoryTaskManager.getHistory().size(), 2, "История записывается неверно");
+    }
+
+    @Test
+    void checkingDataIntegrityChangingId() {
+        inMemoryTaskManager.createTask(Status.NEW, task1);
+        inMemoryTaskManager.createTask(Status.NEW, task2);
+        Task task = inMemoryTaskManager.getTaskById(task1.getId());
+        task.setId(1000);
+        assertNotEquals(task.getId(), task1.getId(), "Нарушена целостность данных в InMemoryTaskManager");
     }
 }

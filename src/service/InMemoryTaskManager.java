@@ -4,11 +4,12 @@ import model.*;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class InMemoryTaskManager implements TaskManager {
-    private final ArrayList<Task> listTasks;
-    private final ArrayList<Epic> listEpics;
-    private final ArrayList<Subtask> listSubtasks;
+    private final List<Task> listTasks;
+    private final List<Epic> listEpics;
+    private final List<Subtask> listSubtasks;
     private final HistoryManager inMemoryHistoryManager;
     private int counterId;
 
@@ -64,19 +65,19 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public ArrayList<Task> getListTasks() {
-        return listTasks;
+    public List<Task> getListTasks() {
+        return List.copyOf(listTasks);
     }
 
     @Override
-    public ArrayList<Epic> getListEpics() {
-        return listEpics;
+    public List<Epic> getListEpics() {
+        return List.copyOf(listEpics);
     }
 
     @Override
-    public ArrayList<Subtask> getListSubtasks(Epic epic) {
+    public List<Subtask> getListSubtasks(Epic epic) {
         if (checkEpic(epic)) {
-            return epic.getSubtasks();
+            return List.copyOf(epic.getSubtasks());
         } else {
             return null;
         }
@@ -84,18 +85,30 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeAllTasks() {
+        for (Task task : listTasks) {
+            inMemoryHistoryManager.remove(task.getId());
+        }
         listTasks.clear();
     }
 
     @Override
     public void removeAllEpics() {
+        for (Epic epic : listEpics) {
+            inMemoryHistoryManager.remove(epic.getId());
+        }
+        for (Subtask subtask : listSubtasks) {
+            inMemoryHistoryManager.remove(subtask.getId());
+        }
         listEpics.clear();
         listSubtasks.clear();
     }
 
     @Override
     public void removeAllSubtasks(Epic epic) {
-        ArrayList<Subtask> subtasksInEpic = epic.getSubtasks();
+        List<Subtask> subtasksInEpic = epic.getSubtasks();
+        for (Subtask subtask : subtasksInEpic) {
+            inMemoryHistoryManager.remove(subtask.getId());
+        }
         for (Subtask subtask : subtasksInEpic) {
             listSubtasks.removeIf(subtaskInList -> subtaskInList.equals(subtask));
         }
@@ -107,7 +120,10 @@ public class InMemoryTaskManager implements TaskManager {
         for (Task task : listTasks) {
             if (task.getId() == id) {
                 inMemoryHistoryManager.add(task);
-                return task;
+                Task copyTask = new Task(task.getTask());
+                copyTask.setId(task.getId());
+                copyTask.setStatus(task.getStatus());
+                return copyTask;
             }
         }
         return null;
@@ -118,7 +134,11 @@ public class InMemoryTaskManager implements TaskManager {
         for (Epic epic : listEpics) {
             if (epic.getId() == id) {
                 inMemoryHistoryManager.add(epic);
-                return epic;
+                Epic copyEpic = new Epic(epic.getTask());
+                copyEpic.setId(epic.getId());
+                copyEpic.setStatus(epic.getStatus());
+                copyEpic.setSubtasks(epic.getSubtasks());
+                return copyEpic;
             }
         }
         return null;
@@ -129,7 +149,10 @@ public class InMemoryTaskManager implements TaskManager {
         for (Subtask subtask : listSubtasks) {
             if (subtask.getId() == id) {
                 inMemoryHistoryManager.add(subtask);
-                return subtask;
+                Subtask copySubtask = new Subtask(subtask.getEpic(), subtask.getTask());
+                copySubtask.setId(subtask.getId());
+                copySubtask.setStatus(subtask.getStatus());
+                return copySubtask;
             }
         }
         return null;
@@ -171,12 +194,13 @@ public class InMemoryTaskManager implements TaskManager {
                 taskIterator.remove();
             }
         }
+        inMemoryHistoryManager.remove(id);
     }
 
     @Override
     public void removeEpicById(int id) {
         Iterator<Epic> epicIterator = listEpics.iterator();
-        ArrayList<Subtask> subtasksInEpic = new ArrayList<>();
+        List<Subtask> subtasksInEpic = new ArrayList<>();
         while (epicIterator.hasNext()) {
             Epic epic = epicIterator.next();
             if (epic.getId() == id) {
@@ -186,13 +210,15 @@ public class InMemoryTaskManager implements TaskManager {
         }
         for (Subtask subtask : subtasksInEpic) {
             listSubtasks.removeIf(subtaskInList -> subtaskInList.equals(subtask));
+            inMemoryHistoryManager.remove(subtask.getId());
         }
+        inMemoryHistoryManager.remove(id);
     }
 
     @Override
     public void removeSubtaskById(int id) {
         Epic epic;
-        ArrayList<Subtask> subtasks;
+        List<Subtask> subtasks;
         Iterator<Subtask> subtaskIterator = listSubtasks.iterator();
         while (subtaskIterator.hasNext()) {
             Subtask subtask = subtaskIterator.next();
@@ -203,7 +229,7 @@ public class InMemoryTaskManager implements TaskManager {
                 subtasks.removeIf(subtaskInEpic -> subtaskInEpic.equals(subtask));
             }
         }
-
+        inMemoryHistoryManager.remove(id);
     }
 
     @Override
@@ -218,7 +244,7 @@ public class InMemoryTaskManager implements TaskManager {
         Epic epic = subtask.getEpic();
 
         subtask.setStatus(status);
-        ArrayList<Subtask> subtasks = epic.getSubtasks();
+        List<Subtask> subtasks = epic.getSubtasks();
         for (Subtask subtaskInEpic : subtasks) {
             if (subtaskInEpic.getStatus().equals(Status.NEW)) {
                 counterNEW++;
@@ -238,15 +264,15 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void changeStatusEpic(Status status, Epic epic) {
         epic.setStatus(status);
-        ArrayList<Subtask> subtasks = epic.getSubtasks();
+        List<Subtask> subtasks = epic.getSubtasks();
         for (Subtask subtask : subtasks) {
             subtask.setStatus(status);
         }
     }
 
     @Override
-    public ArrayList<Task> getHistory() {
-        return inMemoryHistoryManager.getHistory();
+    public List<Task> getHistory() {
+        return List.copyOf(inMemoryHistoryManager.getHistory());
     }
 
     public boolean checkEpic(Epic epic) {
