@@ -54,13 +54,13 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
     }
 
-    class CustomLinkedList<Task> {
-        private Node<Task> head;
-        private Node<Task> tail;
+    class CustomLinkedList<T> {
+        private Node<T> head;
+        private Node<T> tail;
 
         public void linkLast(Task task) {
-            final Node<Task> oldTail = tail;
-            final Node<Task> newNode = new Node<>(oldTail, task, null);
+            final Node<T> oldTail = tail;
+            final Node<T> newNode = new Node<>(oldTail, task, null);
             tail = newNode;
             if (oldTail == null) {
                 head = newNode;
@@ -71,7 +71,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 
         public List<Task> getTasks() {
             List<Task> tasks = new ArrayList<>();
-            Node<Task> taskNode = tail;
+            Node<T> taskNode = tail;
             while (taskNode != null) {
                 tasks.add(taskNode.task);
                 taskNode = taskNode.prevTask;

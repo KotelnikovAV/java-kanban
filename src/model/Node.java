@@ -1,11 +1,11 @@
 package model;
 
-public class Node<Task> {
+public class Node<T> {
     public Task task;
-    public Node<Task> nextTask;
-    public Node<Task> prevTask;
+    public Node<T> nextTask;
+    public Node<T> prevTask;
 
-    public Node(Node<Task> prevTask, Task task, Node<Task> nextTask) {
+    public Node(Node<T> prevTask, Task task, Node<T> nextTask) {
         this.task = task;
         this.nextTask = nextTask;
         this.prevTask = prevTask;
