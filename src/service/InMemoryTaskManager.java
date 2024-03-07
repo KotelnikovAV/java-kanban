@@ -137,7 +137,7 @@ public class InMemoryTaskManager implements TaskManager {
                 Epic copyEpic = new Epic(epic.getTask());
                 copyEpic.setId(epic.getId());
                 copyEpic.setStatus(epic.getStatus());
-                copyEpic.setSubtasks(epic.getSubtasks());
+                copyEpic.getSubtasks().addAll(epic.getSubtasks());
                 return copyEpic;
             }
         }
