@@ -44,10 +44,13 @@ public class InMemoryHistoryManager implements HistoryManager {
         if (node.getPrevTask() != null && node.getNextTask() != null) {
             node.getPrevTask().setNextTask(node.getNextTask());
             node.getNextTask().setPrevTask(node.getPrevTask());
+        } else if (node.getPrevTask() == null && node.getNextTask() == null) {
+            listHistory.head = null;
+            listHistory.tail = null;
         } else if (node.getPrevTask() == null) {
             node.getNextTask().setPrevTask(null);
             listHistory.head = node.getNextTask();
-        } else {
+        } else if (node.getNextTask() == null) {
             node.getPrevTask().setNextTask(null);
             listHistory.tail = node.getPrevTask();
         }
@@ -74,7 +77,6 @@ public class InMemoryHistoryManager implements HistoryManager {
             while (taskNode != null) {
                 tasks.add(taskNode.getTask());
                 taskNode = taskNode.getPrevTask();
-
             }
             return tasks;
         }

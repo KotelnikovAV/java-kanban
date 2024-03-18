@@ -14,7 +14,6 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
-        return "Подзадача: " + getTask() + ". Идентификационный номер подзадачи: " + getId() + ". Статус подзадачи: "
-                + getStatus() + ". Данная подзадача входит в эпик: " + epic.getTask() + ".";
+        return getId() + ",SUBTASK," + getTask() + "," + getStatus() + "," + epic.getId();
     }
 }

@@ -20,6 +20,8 @@ public interface TaskManager {
 
     List<Subtask> getListSubtasks(Epic epic);
 
+    List<Subtask> getListSubtasks();
+
     void removeAllTasks();
 
     void removeAllEpics();

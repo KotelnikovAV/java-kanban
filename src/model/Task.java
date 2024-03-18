@@ -35,7 +35,7 @@ public class Task {
     }
 
     @Override
-    public boolean equals(Object o) { // сделал таким образом, чтобы можно было сравнивать разные типы данных
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null) return false;
         Task task;
@@ -62,7 +62,6 @@ public class Task {
 
     @Override
     public String toString() {
-        return "Задача: " + getTask() + ". Идентификационный номер задачи: " + getId() + ". Статус задачи: "
-                + getStatus() + ".";
+        return getId() + ",TASK," + getTask() + "," + getStatus();
     }
 }
