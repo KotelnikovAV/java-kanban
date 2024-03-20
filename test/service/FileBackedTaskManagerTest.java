@@ -24,8 +24,9 @@ class FileBackedTaskManagerTest {
 
     @Test
     void checkReadFromEmptyFile() {
-        TaskManager inMemoryTaskManager = Managers.getFileBackedTaskManager(file.getName());
-        ((FileBackedTaskManager) inMemoryTaskManager).loadFromFile();
+        FileBackedTaskManager inMemoryTaskManager = (FileBackedTaskManager) Managers.getFileBackedTaskManager();
+        inMemoryTaskManager.setNameFile(file.getName());
+        inMemoryTaskManager.loadFromFile();
         assertEquals(0, inMemoryTaskManager.getListTasks().size(), "Список не пустой");
         assertEquals(0, inMemoryTaskManager.getListEpics().size(), "Список не пустой");
         assertEquals(0, inMemoryTaskManager.getListSubtasks().size(), "Список не пустой");
@@ -34,13 +35,14 @@ class FileBackedTaskManagerTest {
 
     @Test
     void checkWriteInEmptyFileAndLoadingTasks () {
-        TaskManager inMemoryTaskManager = Managers.getFileBackedTaskManager(file.getName());
+        FileBackedTaskManager inMemoryTaskManager = (FileBackedTaskManager) Managers.getFileBackedTaskManager();
+        inMemoryTaskManager.setNameFile(file.getName());
         inMemoryTaskManager.createTask(Status.NEW, new Task("Пропылесосить"));
         inMemoryTaskManager.createTask(Status.NEW, new Task("Поспать"));
         inMemoryTaskManager.createEpic(Status.NEW, new Epic("Переехать"));
         inMemoryTaskManager.getTaskById(1);
         inMemoryTaskManager.getEpicById(3);
-        ((FileBackedTaskManager) inMemoryTaskManager).loadFromFile();
+        inMemoryTaskManager.loadFromFile();
         assertEquals(2, inMemoryTaskManager.getListTasks().size(), "Запись прошла некорректно");
         assertEquals(1, inMemoryTaskManager.getListEpics().size(), "Запись прошла некорректно");
         assertEquals(2, inMemoryTaskManager.getHistory().size(), "Запись прошла некорректно");

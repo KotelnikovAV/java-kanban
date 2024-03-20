@@ -8,7 +8,7 @@ import service.TaskManager;
 public class Main {
 
     public static void main(String[] args) {
-        TaskManager inMemoryTaskManager = Managers.getFileBackedTaskManager("TaskManagerMemory.csv");
+        TaskManager inMemoryTaskManager = Managers.getFileBackedTaskManager();
         ((FileBackedTaskManager) inMemoryTaskManager).loadFromFile();
         System.out.println(inMemoryTaskManager.getHistory());
         inMemoryTaskManager.createTask(Status.NEW, new Task("Пропылесосить"));

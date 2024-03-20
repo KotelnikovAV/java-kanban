@@ -9,7 +9,7 @@ public class Managers {
         return new InMemoryHistoryManager();
     }
 
-    public static TaskManager getFileBackedTaskManager(String file) {
-        return new FileBackedTaskManager(file);
+    public static TaskManager getFileBackedTaskManager() {
+        return new FileBackedTaskManager("TaskManagerMemory.csv");
     }
 }

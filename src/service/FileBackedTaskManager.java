@@ -1,5 +1,6 @@
 package service;
 
+import exceptions.ManagerSaveException;
 import model.*;
 
 import java.io.*;
@@ -8,7 +9,7 @@ import java.util.*;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
-    private final String nameFile;
+    private String nameFile;
     private final Map<Integer, Epic> epicWithId;
     private final Map<Integer, Task> historyIndexWithTask;
     private static final int INDEX_HISTORY = 0;
@@ -36,6 +37,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 String stringTask = bufferedReader.readLine();
                 Task task = taskFromString(stringTask);
                 findIndexTaskFromHistory(task, stringTask);
+
                 if (task == null) {
                     continue;
                 }
@@ -55,16 +57,18 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     maxId = id;
                 }
             }
+
             setCounterId(maxId);
+
             for (int i = historyIndexWithTask.size() - 1; i >= 0; i--) {
                 inMemoryHistoryManager.add(historyIndexWithTask.get(i));
             }
             historyIndexWithTask.clear();
         } catch (IOException e) {
             try {
-                throw new ManagerSaveException("Данного файла не существует", nameFile);
+                throw new ManagerSaveException("Файла " + nameFile + " не существует");
             } catch (ManagerSaveException ex) {
-                System.out.println(ex.getDetailMessage());
+                System.out.println(ex.getMessage());
             }
         }
     }
@@ -98,9 +102,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             }
         } catch (IOException e) {
             try {
-                throw new ManagerSaveException("Данного файла не существует", nameFile);
+                throw new ManagerSaveException("Файла " + nameFile + " не существует");
             } catch (ManagerSaveException ex) {
-                System.out.println(ex.getDetailMessage());
+                System.out.println(ex.getMessage());
             }
         }
     }
@@ -135,6 +139,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             case ("DONE") -> Status.DONE;
             default -> null;
         };
+    }
+
+    public void setNameFile(String nameFile) {
+        this.nameFile = nameFile;
     }
 
     @Override
