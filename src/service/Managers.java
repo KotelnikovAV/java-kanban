@@ -8,4 +8,8 @@ public class Managers {
     public static HistoryManager getHistoryManager() {
         return new InMemoryHistoryManager();
     }
+
+    public static TaskManager getFileBackedTaskManager() {
+        return new FileBackedTaskManager("TaskManagerMemory.csv");
+    }
 }

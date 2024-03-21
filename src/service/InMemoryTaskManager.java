@@ -10,7 +10,7 @@ public class InMemoryTaskManager implements TaskManager {
     private final List<Task> listTasks;
     private final List<Epic> listEpics;
     private final List<Subtask> listSubtasks;
-    private final HistoryManager inMemoryHistoryManager;
+    protected final HistoryManager inMemoryHistoryManager;
     private int counterId;
 
     public InMemoryTaskManager() {
@@ -19,6 +19,10 @@ public class InMemoryTaskManager implements TaskManager {
         listSubtasks = new ArrayList<>();
         inMemoryHistoryManager = Managers.getHistoryManager();
         counterId = 0;
+    }
+
+    public void setCounterId(int counterId) {
+        this.counterId = counterId;
     }
 
     @Override
@@ -81,6 +85,11 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public List<Subtask> getListSubtasks() {
+        return List.copyOf(listSubtasks);
     }
 
     @Override

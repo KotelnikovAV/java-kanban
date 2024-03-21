@@ -1,0 +1,9 @@
+indexInHistory,id,type,description,status,epic
+1,7,TASK,Погулять,NEW
+-1,8,TASK,Пропылесосить,NEW
+-1,9,TASK,Поспать,NEW
+3,1,EPIC,Приготовить еду,NEW
+-1,10,EPIC,Переехать,NEW
+0,2,SUBTASK,Купить продукты,NEW,1
+4,3,SUBTASK,Помыть продукты,NEW,1
+2,4,SUBTASK,Поставить все на огонь,NEW,1
