@@ -65,11 +65,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             }
             historyIndexWithTask.clear();
         } catch (IOException e) {
-            try {
-                throw new ManagerSaveException("Файла " + nameFile + " не существует");
-            } catch (ManagerSaveException ex) {
-                System.out.println(ex.getMessage());
-            }
+            RuntimeException ex = new ManagerSaveException("Файла " + nameFile + " не существует", e);
+            System.out.println(ex.getMessage());
         }
     }
 
@@ -101,11 +98,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 writer.write(indexInHistory + "," + subtask.toString() + "\n");
             }
         } catch (IOException e) {
-            try {
-                throw new ManagerSaveException("Файла " + nameFile + " не существует");
-            } catch (ManagerSaveException ex) {
-                System.out.println(ex.getMessage());
-            }
+            RuntimeException ex = new ManagerSaveException("Файла " + nameFile + " не существует", e);
+            System.out.println(ex.getMessage());
         }
     }
 

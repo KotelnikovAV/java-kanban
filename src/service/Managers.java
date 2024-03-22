@@ -1,6 +1,9 @@
 package service;
 
 public class Managers {
+
+    private static final String NAME_FILE = "TaskManagerMemory.csv";
+
     public static TaskManager getTaskManager() {
         return new InMemoryTaskManager();
     }
@@ -10,6 +13,6 @@ public class Managers {
     }
 
     public static TaskManager getFileBackedTaskManager() {
-        return new FileBackedTaskManager("TaskManagerMemory.csv");
+        return new FileBackedTaskManager(NAME_FILE);
     }
 }
