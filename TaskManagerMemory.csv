@@ -1,9 +1,9 @@
-indexInHistory,id,type,description,status,epic
-1,5,TASK,Погулять,NEW
--1,6,TASK,Поспать,NEW
--1,7,TASK,Пропылесосить,NEW
-3,1,EPIC,Приготовить еду,NEW
--1,8,EPIC,Переехать,NEW
-0,2,SUBTASK,Купить продукты,NEW,1
-4,3,SUBTASK,Помыть продукты,NEW,1
-2,4,SUBTASK,Поставить все на огонь,NEW,1
+indexInHistory,id,type,description,status,startTime,duration,epic
+2,5,TASK,Погулять,NEW,14:00 20.10.24,30
+-1,6,TASK,Поспать,NEW,15:00 20.10.24,30
+1,7,TASK,Пропылесосить,NEW,12:00 20.10.24,30
+4,1,EPIC,Приготовить еду,NEW,09:00 21.10.24,90
+-1,8,EPIC,Переехать,NEW,09:30 20.10.24,30
+0,2,SUBTASK,Купить продукты,NEW,09:00 21.10.24,30,1
+5,3,SUBTASK,Помыть продукты,NEW,10:00 21.10.24,30,1
+3,4,SUBTASK,Поставить все на огонь,NEW,11:00 21.10.24,30,1

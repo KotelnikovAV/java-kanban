@@ -37,9 +37,12 @@ class FileBackedTaskManagerTest {
     void checkWriteInEmptyFileAndLoadingTasks () {
         FileBackedTaskManager inMemoryTaskManager = (FileBackedTaskManager) Managers.getFileBackedTaskManager();
         inMemoryTaskManager.setNameFile(file.getName());
-        inMemoryTaskManager.createTask(Status.NEW, new Task("Пропылесосить"));
-        inMemoryTaskManager.createTask(Status.NEW, new Task("Поспать"));
-        inMemoryTaskManager.createEpic(Status.NEW, new Epic("Переехать"));
+        inMemoryTaskManager.createTask(Status.NEW, new Task("Пропылесосить", "10:30 01.01.02",
+                "30"));
+        inMemoryTaskManager.createTask(Status.NEW, new Task("Поспать", "11:30 01.01.02",
+                "30"));
+        inMemoryTaskManager.createEpic(Status.NEW, new Epic("Переехать", "12:30 01.01.01",
+                "30"));
         inMemoryTaskManager.getTaskById(1);
         inMemoryTaskManager.getEpicById(3);
         inMemoryTaskManager.loadFromFile();
