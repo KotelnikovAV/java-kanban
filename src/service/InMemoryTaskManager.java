@@ -3,11 +3,15 @@ package service;
 import exceptions.IntersectionIntervalsException;
 import model.*;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
+    protected static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm dd.MM.yy");
+    private static final double REDUCTION_FACTOR = 0.8;
+
     private final List<Task> listTasks;
     private final List<Epic> listEpics;
     private final List<Subtask> listSubtasks;
@@ -15,8 +19,6 @@ public class InMemoryTaskManager implements TaskManager {
     protected Map<LocalDateTime, Boolean> takenInterval;
     protected final HistoryManager inMemoryHistoryManager;
     private int counterId;
-    protected static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm dd.MM.yy");
-    private static final int TIME_INTERVAL = 5;
 
     public InMemoryTaskManager() {
         listTasks = new ArrayList<>();
@@ -32,6 +34,10 @@ public class InMemoryTaskManager implements TaskManager {
             } else if (LocalDateTime.parse(task2.getStartTime(), DATE_TIME_FORMATTER)
                     .isAfter(LocalDateTime.parse(task1.getStartTime(), DATE_TIME_FORMATTER))) {
                 return -1;
+            } else if (LocalDateTime.parse(task2.getStartTime(), DATE_TIME_FORMATTER)
+                    .isEqual(LocalDateTime.parse(task1.getStartTime(), DATE_TIME_FORMATTER))
+                    && task1.getId() == task2.getId()) {
+                return 0;
             } else {
                 return 1;
             }
@@ -271,18 +277,18 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void changeStatusSubtask(Status status, Subtask subtask) {
-        long counterNEW;
-        long counterDONE;
+        long counterNew;
+        long counterDone;
         Epic epic = subtask.getEpic();
 
         subtask.setStatus(status);
         List<Subtask> subtasks = epic.getSubtasks();
-        counterNEW = epic.getSubtasks().stream().filter(subtask1 -> subtask1.getStatus().equals(Status.NEW)).count();
-        counterDONE = epic.getSubtasks().stream().filter(subtask1 -> subtask1.getStatus().equals(Status.DONE)).count();
+        counterNew = epic.getSubtasks().stream().filter(subtask1 -> subtask1.getStatus().equals(Status.NEW)).count();
+        counterDone = epic.getSubtasks().stream().filter(subtask1 -> subtask1.getStatus().equals(Status.DONE)).count();
 
-        if (counterNEW == subtasks.size()) {
+        if (counterNew == subtasks.size()) {
             epic.setStatus(Status.NEW);
-        } else if (counterDONE == subtasks.size()) {
+        } else if (counterDone == subtasks.size()) {
             epic.setStatus(Status.DONE);
         } else {
             epic.setStatus(Status.IN_PROGRESS);
@@ -302,24 +308,34 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Set<Task> getPrioritizedTasks() {
-        return tasksByPriority;
+    public List<Task> getPrioritizedTasks() {
+        return List.copyOf(tasksByPriority);
     }
 
     public boolean addTakenInterval(Task task) {
         LocalDateTime endTime = task.getEndTime();
         LocalDateTime localDateTime = LocalDateTime.parse(task.getStartTime(), DATE_TIME_FORMATTER);
         Map<LocalDateTime, Boolean> copyTakenInterval = new HashMap<>(takenInterval);
+        Duration duration = Duration.ofMinutes(Integer.parseInt(task.getDurationTask()));
 
         try {
             while (localDateTime.isBefore(endTime)) {
-                if (copyTakenInterval.containsKey(localDateTime)) {
+                duration = Duration.ofMinutes((long) (duration.toMinutes() * REDUCTION_FACTOR));
+                // за счет этой переменной происходит быстрая выборочная проверка на пересечения из средней области
+                if (takenInterval.containsKey(localDateTime)
+                        || takenInterval.containsKey(endTime.minusMinutes(1))
+                        || takenInterval.containsKey(endTime.minus(duration))
+                        || takenInterval.containsKey(localDateTime.plus(duration))) {
+                    // значительно увеличил вероятность нахождения пересечений во время первых пару-тройку итераций
                     throw new IntersectionIntervalsException("Добавление недоступно. Задача '" + task.getTask()
                             + "' пересекается по времени с другими задачами");
                 }
+
                 copyTakenInterval.put(localDateTime, false);
-                localDateTime = localDateTime.plusMinutes(1); /* подумал, чего мелочиться, 15 минутные интервалы
-                это не удобно. Пусть будут как в реальности - минутные интервалы */
+                localDateTime = localDateTime.plusMinutes(1);
+                endTime = endTime.minusMinutes(1);
+                copyTakenInterval.put(endTime, false);
+                // сразу же начинаем заполнять с двух сторон и движемся к центру
             }
         } catch (IntersectionIntervalsException e) {
             System.out.println(e.getMessage());
@@ -337,6 +353,8 @@ public class InMemoryTaskManager implements TaskManager {
         while (localDateTime.isBefore(endTime)) {
             takenInterval.remove(localDateTime);
             localDateTime = localDateTime.plusMinutes(1);
+            endTime = endTime.minusMinutes(1);
+            takenInterval.remove(endTime);
         }
     }
 

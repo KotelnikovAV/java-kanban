@@ -1,7 +1,6 @@
 package service;
 
 public class Managers {
-
     private static final String NAME_FILE = "TaskManagerMemory.csv";
 
     public static TaskManager getTaskManager() {

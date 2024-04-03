@@ -66,6 +66,6 @@ public class Epic extends Task {
     @Override
     public String toString() {
         return getId() + ",EPIC," + getTask() + "," + getStatus() + "," + startTime.format(DATE_TIME_FORMATTER)
-                + "," + durationTask.toMinutes();
+                + "," + durationTask.toMinutes() + "," + getEndTime().format(DATE_TIME_FORMATTER);
     }
 }

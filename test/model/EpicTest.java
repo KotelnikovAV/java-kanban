@@ -10,12 +10,12 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class EpicTest {
+    public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm dd.MM.yy");
 
     public static Epic epic;
     public static Subtask subtask1;
     public static Subtask subtask2;
     public static List<Subtask> subtasks;
-    public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm dd.MM.yy");
 
     @BeforeAll
     public static void beforeAll() {

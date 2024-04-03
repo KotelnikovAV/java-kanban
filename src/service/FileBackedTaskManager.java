@@ -8,18 +8,18 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
-
-    private String nameFile;
-    private final Map<Integer, Epic> epicWithId;
-    private final Map<Integer, Task> historyIndexWithTask;
     private static final int INDEX_HISTORY = 0;
     private static final int INDEX_ID = 1;
     private static final int INDEX_TYPE = 2;
     private static final int INDEX_DESCRIPTION = 3;
     private static final int INDEX_STATUS = 4;
-    private static final int INDEX_EPIC = 7;
     private static final int INDEX_START_TIME = 5;
     private static final int INDEX_DURATION = 6;
+    private static final int INDEX_EPIC = 8;
+
+    private String nameFile;
+    private final Map<Integer, Epic> epicWithId;
+    private final Map<Integer, Task> historyIndexWithTask;
 
     public FileBackedTaskManager(String nameFile) {
         super();
@@ -87,8 +87,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public void save() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(nameFile, StandardCharsets.UTF_8))) {
             int indexInHistory;
-            writer.write("indexInHistory,id,type,description,status,startTime,duration,epic" + "\n");
-            for (Task task : getListTasks()) {      // код через стримы в данном случае будет нечитаемым
+            writer.write("indexInHistory,id,type,description,status,startTime,duration,endTime,epic" + "\n");
+            for (Task task : getListTasks()) {
                 indexInHistory = getHistory().indexOf(task);
                 writer.write(indexInHistory + "," + task.toString() + "\n");
             }

@@ -7,7 +7,6 @@ import model.Task;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 public interface TaskManager {
     void createTask(Status status, Task task);
@@ -56,5 +55,5 @@ public interface TaskManager {
 
     List<Task> getHistory();
 
-    Set<Task> getPrioritizedTasks();
+    List<Task> getPrioritizedTasks();
 }
