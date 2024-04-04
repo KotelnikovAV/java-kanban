@@ -8,16 +8,18 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
-
-    private String nameFile;
-    private final Map<Integer, Epic> epicWithId;
-    private final Map<Integer, Task> historyIndexWithTask;
     private static final int INDEX_HISTORY = 0;
     private static final int INDEX_ID = 1;
     private static final int INDEX_TYPE = 2;
     private static final int INDEX_DESCRIPTION = 3;
     private static final int INDEX_STATUS = 4;
-    private static final int INDEX_EPIC = 5;
+    private static final int INDEX_START_TIME = 5;
+    private static final int INDEX_DURATION = 6;
+    private static final int INDEX_EPIC = 8;
+
+    private String nameFile;
+    private final Map<Integer, Epic> epicWithId;
+    private final Map<Integer, Task> historyIndexWithTask;
 
     public FileBackedTaskManager(String nameFile) {
         super();
@@ -29,6 +31,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public void loadFromFile() {
         super.removeAllEpics();
         super.removeAllTasks();
+        takenInterval.clear();
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(nameFile, StandardCharsets.UTF_8))) {
             int id;
             int maxId = 0;
@@ -84,7 +87,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public void save() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(nameFile, StandardCharsets.UTF_8))) {
             int indexInHistory;
-            writer.write("indexInHistory,id,type,description,status,epic" + "\n");
+            writer.write("indexInHistory,id,type,description,status,startTime,duration,endTime,epic" + "\n");
             for (Task task : getListTasks()) {
                 indexInHistory = getHistory().indexOf(task);
                 writer.write(indexInHistory + "," + task.toString() + "\n");
@@ -105,24 +108,30 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     public Task taskFromString(String taskFromFile) {
         String[] splitTask = taskFromFile.split(",");
-        if (splitTask[INDEX_TYPE].equals("TASK")) {
-            Task task = new Task(splitTask[INDEX_DESCRIPTION]);
-            task.setId(Integer.parseInt(splitTask[INDEX_ID]));
-            task.setStatus(statusFromString(splitTask[INDEX_STATUS]));
-            return task;
-        } else if (splitTask[2].equals("EPIC")) {
-            Task epic = new Epic(splitTask[INDEX_DESCRIPTION]);
-            epic.setId(Integer.parseInt(splitTask[INDEX_ID]));
-            epic.setStatus(statusFromString(splitTask[INDEX_STATUS]));
-            return epic;
-        } else if (splitTask[2].equals("SUBTASK")) {
-            Task subtask = new Subtask(epicWithId.get(Integer.parseInt(splitTask[INDEX_EPIC])),
-                    splitTask[INDEX_DESCRIPTION]);
-            subtask.setId(Integer.parseInt(splitTask[INDEX_ID]));
-            subtask.setStatus(statusFromString(splitTask[INDEX_STATUS]));
-            return subtask;
-        } else {
-            return null;
+        switch (splitTask[INDEX_TYPE]) {
+            case "TASK" -> {
+                Task task = new Task(splitTask[INDEX_DESCRIPTION], splitTask[INDEX_START_TIME], splitTask[INDEX_DURATION]);
+                task.setId(Integer.parseInt(splitTask[INDEX_ID]));
+                task.setStatus(statusFromString(splitTask[INDEX_STATUS]));
+                return task;
+            }
+            case "EPIC" -> {
+                Task epic = new Epic(splitTask[INDEX_DESCRIPTION], splitTask[INDEX_START_TIME], splitTask[INDEX_DURATION]);
+                epic.setId(Integer.parseInt(splitTask[INDEX_ID]));
+                epic.setStatus(statusFromString(splitTask[INDEX_STATUS]));
+                return epic;
+            }
+            case "SUBTASK" -> {
+                Epic epic = epicWithId.get(Integer.parseInt(splitTask[INDEX_EPIC]));
+                Task subtask = new Subtask(epic, splitTask[INDEX_DESCRIPTION], splitTask[INDEX_START_TIME],
+                        splitTask[INDEX_DURATION]);
+                subtask.setId(Integer.parseInt(splitTask[INDEX_ID]));
+                subtask.setStatus(statusFromString(splitTask[INDEX_STATUS]));
+                return subtask;
+            }
+            default -> {
+                return null;
+            }
         }
     }
 
@@ -176,22 +185,22 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public Task getTaskById(int id) {
-        Task task = super.getTaskById(id);
+    public Optional<Task> getTaskById(int id) {
+        Optional<Task> task = super.getTaskById(id);
         save();
         return task;
     }
 
     @Override
-    public Epic getEpicById(int id) {
-        Epic epic = super.getEpicById(id);
+    public Optional<Epic> getEpicById(int id) {
+        Optional<Epic> epic = super.getEpicById(id);
         save();
         return epic;
     }
 
     @Override
-    public Subtask getSubtaskById(int id) {
-        Subtask subtask = super.getSubtaskById(id);
+    public Optional<Subtask> getSubtaskById(int id) {
+        Optional<Subtask> subtask = super.getSubtaskById(id);
         save();
         return subtask;
     }

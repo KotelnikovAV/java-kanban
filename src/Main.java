@@ -3,19 +3,30 @@ import model.Status;
 import model.Task;
 import service.FileBackedTaskManager;
 import service.Managers;
-import service.TaskManager;
 
 public class Main {
 
     public static void main(String[] args) {
-        TaskManager inMemoryTaskManager = Managers.getFileBackedTaskManager();
-        ((FileBackedTaskManager) inMemoryTaskManager).loadFromFile();
-        System.out.println(inMemoryTaskManager.getHistory());
-        inMemoryTaskManager.createTask(Status.NEW, new Task("Пропылесосить"));
-        inMemoryTaskManager.createTask(Status.NEW, new Task("Поспать"));
-        inMemoryTaskManager.createEpic(Status.NEW, new Epic("Переехать"));
-        System.out.println(inMemoryTaskManager.getTaskById(7));
-        System.out.println(inMemoryTaskManager.getSubtaskById(2));
-        System.out.println(inMemoryTaskManager.getHistory());
+        FileBackedTaskManager inMemoryTaskManager = (FileBackedTaskManager) Managers.getFileBackedTaskManager();
+        inMemoryTaskManager.loadFromFile(); /* эту строчку я оставлю, здесь все равно задействуется те же методы,
+        что и при создании такси вручную */
+        System.out.println(inMemoryTaskManager.getHistory() + "\n");
+        System.out.println(inMemoryTaskManager.getPrioritizedTasks() + "\n");
+        inMemoryTaskManager.removeAllTasks();
+        System.out.println(inMemoryTaskManager.getPrioritizedTasks() + "\n");
+        inMemoryTaskManager.createTask(Status.NEW, new Task("Что угодно1", "09:20 20.10.24",
+                "20")); // пересекается
+        inMemoryTaskManager.createTask(Status.NEW, new Task("Что угодно2", "10:00 20.10.24",
+                "40")); // не пересекается
+        inMemoryTaskManager.createEpic(Status.NEW, new Epic("Что угодно3", "09:00 20.10.24",
+                "30")); // не пересекается
+        System.out.println(inMemoryTaskManager.getPrioritizedTasks() + "\n");
+        inMemoryTaskManager.getTaskById(9);
+        inMemoryTaskManager.removeEpicById(8);
+        inMemoryTaskManager.removeEpicById(10);
+        inMemoryTaskManager.createTask(Status.NEW, new Task("Что угодно1", "09:40 20.10.24",
+                "20")); // после удалений уже не пересекается и мы можем добавить эту задачу
+        System.out.println(inMemoryTaskManager.getPrioritizedTasks() + "\n");
+        System.out.println(inMemoryTaskManager.getHistory() + "\n");
     }
 }
