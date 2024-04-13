@@ -3,6 +3,7 @@ package model;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 public class Task {
     protected static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm dd.MM.yy");
@@ -16,8 +17,13 @@ public class Task {
     public Task(String task, String startTime, String durationTask) {
         this.task = task;
         id = 0;
-        this.durationTask = Duration.ofMinutes(Integer.parseInt(durationTask));
-        this.startTime = LocalDateTime.parse(startTime, DATE_TIME_FORMATTER);
+        if (startTime != null) {
+            this.durationTask = Duration.ofMinutes(Integer.parseInt(durationTask));
+            this.startTime = LocalDateTime.parse(startTime, DATE_TIME_FORMATTER);
+        } else {
+            this.durationTask = null;
+            this.startTime = null;
+        }
     }
 
     public String getTask() {
@@ -79,15 +85,7 @@ public class Task {
 
     @Override
     public int hashCode() {
-        int hash = 17;
-        if (task != null) {
-            hash = hash + task.hashCode();
-        }
-        hash = hash * 31;
-        if (id != 0) {
-            hash = hash + id;
-        }
-        return hash;
+        return Objects.hash(id);
     }
 
     @Override

@@ -19,7 +19,7 @@ class EpicTest {
 
     @BeforeAll
     public static void beforeAll() {
-        epic = new Epic("Переезд", "10:00 01.01.01", "30");
+        epic = new Epic("Переезд");
         subtask1 = new Subtask(epic, "Собрать вещи", "11:00 01.01.01", "30");
         subtask2 = new Subtask(epic, "Сказать пока", "12:30 01.01.01", "30");
         subtask1.setId(1);
@@ -29,8 +29,8 @@ class EpicTest {
         subtasks = new ArrayList<>();
         subtasks.add(subtask1);
         subtasks.add(subtask2);
-        epic.setStartTime("");
-        epic.setDuration("");
+        epic.setStartTime();
+        epic.setDuration();
     }
 
     @Test

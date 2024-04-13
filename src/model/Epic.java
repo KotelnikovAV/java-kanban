@@ -5,12 +5,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 public class Epic extends Task {
     private final List<Subtask> subtasks;
 
-    public Epic(String task, String startTime, String durationTask) {
-        super(task, startTime, durationTask);
+    public Epic(String task) {
+        super(task, null, null);
         subtasks = new ArrayList<>();
     }
 
@@ -26,32 +27,23 @@ public class Epic extends Task {
         return subtasks;
     }
 
-    @Override
-    public void setStartTime(String startTime) {
-        if (subtasks.isEmpty()) {
-            this.startTime = LocalDateTime.parse(startTime, DATE_TIME_FORMATTER);
-        } else {
-            this.startTime = subtasks.stream().map(subtask -> subtask.startTime)
-                    .min(Comparator.comparingInt(LocalDateTime::getMinute)).get();
-        }
+    public void setStartTime() {
+        Optional<LocalDateTime> startTimeOfEpic = subtasks.stream()
+                .map(subtask -> subtask.startTime)
+                .min(Comparator.comparingInt(LocalDateTime::getMinute));
+        startTimeOfEpic.ifPresent(localDateTime -> this.startTime = localDateTime);
     }
 
-    @Override
-    public void setDuration(String durationTask) {
-        if (subtasks.isEmpty()) {
-            this.durationTask = Duration.ofMinutes(Integer.parseInt(durationTask));
-        } else {
-            this.durationTask = Duration.ofMinutes(subtasks.stream().map(subtask -> subtask.durationTask.toMinutes())
-                    .reduce(0L, Long::sum));
-        }
+    public void setDuration() {
+        this.durationTask = Duration.ofMinutes(subtasks.stream()
+                .map(subtask -> subtask.durationTask.toMinutes())
+                .reduce(0L, Long::sum));
     }
 
     @Override
     public LocalDateTime getEndTime() {
-        if (subtasks.isEmpty()) {
-            return startTime.plus(durationTask);
-        } else {
-            return subtasks.stream().map(Task::getEndTime).max(((endTime1, endTime2) -> {
+        if (!subtasks.isEmpty()) {
+            Optional<LocalDateTime> endTime = subtasks.stream().map(Task::getEndTime).max(((endTime1, endTime2) -> {
                 if (endTime1.isAfter(endTime2)) {
                     return 1;
                 } else if (endTime1.isBefore(endTime2)) {
@@ -59,13 +51,21 @@ public class Epic extends Task {
                 } else {
                     return 0;
                 }
-            })).get();
+            }));
+            return endTime.get();
+        } else {
+            return null;
         }
     }
 
     @Override
     public String toString() {
-        return getId() + ",EPIC," + getTask() + "," + getStatus() + "," + startTime.format(DATE_TIME_FORMATTER)
-                + "," + durationTask.toMinutes() + "," + getEndTime().format(DATE_TIME_FORMATTER);
+        if (startTime == null) {
+            return getId() + ",EPIC," + getTask() + "," + getStatus() + "," + null
+                    + "," + null + "," + null;
+        } else {
+            return getId() + ",EPIC," + getTask() + "," + getStatus() + "," + startTime.format(DATE_TIME_FORMATTER)
+                    + "," + durationTask.toMinutes() + "," + getEndTime().format(DATE_TIME_FORMATTER);
+        }
     }
 }

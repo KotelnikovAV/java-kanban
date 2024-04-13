@@ -24,7 +24,7 @@ class InMemoryTaskManagerTest {
         inMemoryTaskManager = new InMemoryTaskManager();
         task1 = new Task("123", "10:30 01.01.01", "30");
         task2 = new Task("125", "11:30 01.01.01", "30");
-        epic = new Epic("234", "12:30 01.01.01", "30");
+        epic = new Epic("234");
         subtask1 = new Subtask(epic, "345", "12:30 01.01.01", "30");
         subtask2 = new Subtask(epic, "345", "13:30 01.01.01", "30");
     }

@@ -68,19 +68,18 @@ public class InMemoryTaskManager implements TaskManager {
         if (listEpics.contains(epic)) {
             return;
         }
-        if (!addTakenInterval(epic)) {
-            return;
-        }
         counterId++;
         epic.setId(counterId);
         epic.setStatus(status);
         listEpics.add(epic);
-        tasksByPriority.add(epic);
     }
 
     @Override
     public void createSubtask(Epic epic, Status status, Subtask subtask) {
         if (listSubtasks.contains(subtask)) {
+            return;
+        }
+        if (!addTakenInterval(subtask)) {
             return;
         }
         counterId++;
@@ -90,6 +89,7 @@ public class InMemoryTaskManager implements TaskManager {
         tasksByPriority.add(subtask);
         epic.addSubtask(subtask);
         updateTimeValuesOfEpic(epic);
+        tasksByPriority.add(epic);
     }
 
     @Override
@@ -172,8 +172,7 @@ public class InMemoryTaskManager implements TaskManager {
         Optional<Epic> epicById = listEpics.stream().filter(epic -> epic.getId() == id).findFirst();
         if (epicById.isPresent()) {
             inMemoryHistoryManager.add(epicById.get());
-            Epic copyEpic = new Epic(epicById.get().getTask(), epicById.get().getStartTime(),
-                    epicById.get().getDurationTask());
+            Epic copyEpic = new Epic(epicById.get().getTask());
             copyEpic.setId(epicById.get().getId());
             copyEpic.setStatus(epicById.get().getStatus());
             copyEpic.getSubtasks().addAll(epicById.get().getSubtasks());
@@ -203,6 +202,11 @@ public class InMemoryTaskManager implements TaskManager {
         Optional<Task> taskById = listTasks.stream().filter(task1 -> task1.getId() == id).findFirst();
         if (taskById.isPresent()) {
             Task taskFromList = taskById.get();
+            removeTakenInterval(taskFromList);
+            if (!addTakenInterval(task)) {
+                addTakenInterval(taskFromList);
+                return;
+            }
             taskFromList.setTask(task.getTask());
             taskFromList.setStatus(task.getStatus());
             taskFromList.setStartTime(task.getStartTime());
@@ -215,6 +219,11 @@ public class InMemoryTaskManager implements TaskManager {
         Optional<Epic> epicById = listEpics.stream().filter(epic1 -> epic1.getId() == id).findFirst();
         if (epicById.isPresent()) {
             Epic epicFromList = epicById.get();
+            removeTakenInterval(epicFromList);
+            if (!addTakenInterval(epic)) {
+                addTakenInterval(epicFromList);
+                return;
+            }
             epicFromList.setTask(epic.getTask());
             epicFromList.setStatus(epic.getStatus());
             epicFromList.setStartTime(epic.getStartTime());
@@ -227,6 +236,14 @@ public class InMemoryTaskManager implements TaskManager {
         Optional<Subtask> subtaskById = listSubtasks.stream().filter(subtask1 -> subtask1.getId() == id).findFirst();
         if (subtaskById.isPresent()) {
             Subtask subtaskFromList = subtaskById.get();
+            Epic epic = subtask.getEpic();
+
+            removeTakenInterval(subtaskFromList.getEpic());
+            updateTimeValuesOfEpic(epic);
+            if (!addTakenInterval(epic)) {
+                addTakenInterval(subtaskFromList.getEpic());
+                return;
+            }
             subtaskFromList.setTask(subtask.getTask());
             subtaskFromList.setStatus(subtask.getStatus());
             subtaskFromList.setStartTime(subtask.getStartTime());
@@ -277,15 +294,19 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void changeStatusSubtask(Status status, Subtask subtask) {
-        long counterNew;
-        long counterDone;
+        int counterNew = 0;
+        int counterDone = 0;
         Epic epic = subtask.getEpic();
 
         subtask.setStatus(status);
         List<Subtask> subtasks = epic.getSubtasks();
-        counterNew = epic.getSubtasks().stream().filter(subtask1 -> subtask1.getStatus().equals(Status.NEW)).count();
-        counterDone = epic.getSubtasks().stream().filter(subtask1 -> subtask1.getStatus().equals(Status.DONE)).count();
-
+        for (Subtask subtaskInEpic : subtasks) {
+            if (subtaskInEpic.getStatus().equals(Status.NEW)) {
+                counterNew++;
+            } else if (subtaskInEpic.getStatus().equals(Status.DONE)) {
+                counterDone++;
+            }
+        }
         if (counterNew == subtasks.size()) {
             epic.setStatus(Status.NEW);
         } else if (counterDone == subtasks.size()) {
@@ -299,7 +320,9 @@ public class InMemoryTaskManager implements TaskManager {
     public void changeStatusEpic(Status status, Epic epic) {
         epic.setStatus(status);
         List<Subtask> subtasks = epic.getSubtasks();
-        subtasks.forEach(subtask -> subtask.setStatus(status));
+        if (status.equals(Status.NEW) || status.equals(Status.DONE)) {
+            subtasks.forEach(subtask -> subtask.setStatus(status));
+        }
     }
 
     @Override
@@ -359,8 +382,8 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     public void updateTimeValuesOfEpic(Epic epic) {
-        epic.setStartTime(epic.getStartTime());
-        epic.setDuration(epic.getDurationTask());
+        epic.setStartTime();
+        epic.setDuration();
     }
 
     public boolean checkEpic(Epic epic) {

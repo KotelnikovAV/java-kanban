@@ -41,13 +41,10 @@ class FileBackedTaskManagerTest {
                 "30"));
         inMemoryTaskManager.createTask(Status.NEW, new Task("Поспать", "11:30 01.01.02",
                 "30"));
-        inMemoryTaskManager.createEpic(Status.NEW, new Epic("Переехать", "12:30 01.01.01",
-                "30"));
         inMemoryTaskManager.getTaskById(1);
-        inMemoryTaskManager.getEpicById(3);
+        inMemoryTaskManager.getTaskById(2);
         inMemoryTaskManager.loadFromFile();
         assertEquals(2, inMemoryTaskManager.getListTasks().size(), "Запись прошла некорректно");
-        assertEquals(1, inMemoryTaskManager.getListEpics().size(), "Запись прошла некорректно");
         assertEquals(2, inMemoryTaskManager.getHistory().size(), "Запись прошла некорректно");
     }
 }

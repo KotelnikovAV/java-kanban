@@ -116,7 +116,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 return task;
             }
             case "EPIC" -> {
-                Task epic = new Epic(splitTask[INDEX_DESCRIPTION], splitTask[INDEX_START_TIME], splitTask[INDEX_DURATION]);
+                Task epic = new Epic(splitTask[INDEX_DESCRIPTION]);
                 epic.setId(Integer.parseInt(splitTask[INDEX_ID]));
                 epic.setStatus(statusFromString(splitTask[INDEX_STATUS]));
                 return epic;
@@ -137,9 +137,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     public Status statusFromString(String status) {
         return switch (status) {
-            case ("NEW") -> Status.NEW;
-            case ("IN_PROGRESS") -> Status.IN_PROGRESS;
-            case ("DONE") -> Status.DONE;
+            case "NEW" -> Status.NEW;
+            case "IN_PROGRESS" -> Status.IN_PROGRESS;
+            case "DONE" -> Status.DONE;
             default -> null;
         };
     }

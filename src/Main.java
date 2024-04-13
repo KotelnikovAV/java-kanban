@@ -1,4 +1,3 @@
-import model.Epic;
 import model.Status;
 import model.Task;
 import service.FileBackedTaskManager;
@@ -14,12 +13,10 @@ public class Main {
         System.out.println(inMemoryTaskManager.getPrioritizedTasks() + "\n");
         inMemoryTaskManager.removeAllTasks();
         System.out.println(inMemoryTaskManager.getPrioritizedTasks() + "\n");
-        inMemoryTaskManager.createTask(Status.NEW, new Task("Что угодно1", "09:20 20.10.24",
+        inMemoryTaskManager.createTask(Status.NEW, new Task("Что угодно1", "09:20 21.10.24",
                 "20")); // пересекается
-        inMemoryTaskManager.createTask(Status.NEW, new Task("Что угодно2", "10:00 20.10.24",
+        inMemoryTaskManager.createTask(Status.NEW, new Task("Что угодно2", "12:00 22.10.24",
                 "40")); // не пересекается
-        inMemoryTaskManager.createEpic(Status.NEW, new Epic("Что угодно3", "09:00 20.10.24",
-                "30")); // не пересекается
         System.out.println(inMemoryTaskManager.getPrioritizedTasks() + "\n");
         inMemoryTaskManager.getTaskById(9);
         inMemoryTaskManager.removeEpicById(8);
