@@ -56,4 +56,8 @@ public interface TaskManager {
     List<Task> getHistory();
 
     List<Task> getPrioritizedTasks();
+
+    boolean getCompletionStatus();
+
+    Epic getEpic(int epicId);
 }
