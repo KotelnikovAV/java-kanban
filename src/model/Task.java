@@ -2,12 +2,11 @@ package model;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
-public class Task {
-    protected static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm dd.MM.yy");
+import static util.TaskMapper.DATE_TIME_FORMATTER;
 
+public class Task {
     private String task;
     private int id;
     private Status status;

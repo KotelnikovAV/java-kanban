@@ -7,12 +7,11 @@ import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 import static java.util.Objects.isNull;
+import static util.TaskMapper.DATE_TIME_FORMATTER;
 
 public class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm dd.MM.yy");
 
     @Override
     public void write(final JsonWriter jsonWriter, final LocalDateTime localDateTime) throws IOException {

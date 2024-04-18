@@ -31,7 +31,7 @@ public class TaskManagerHandler implements HttpHandler {
     private static final int INDEX_OF_ID = 3;
     private static final int INDEX_OF_REQUEST_PARAMETERS = 4;
 
-    private TaskManager fileBackedTaskManager;
+    private TaskManager taskManager;
     Gson gson = new GsonBuilder().serializeNulls()
             .setPrettyPrinting()
             .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
@@ -69,6 +69,7 @@ public class TaskManagerHandler implements HttpHandler {
         if (getResult == null) {
             return "";
         }
+
         if (getResult.size() == 1) {
             return gson.toJson(getResult.getFirst());
         } else {
@@ -98,11 +99,12 @@ public class TaskManagerHandler implements HttpHandler {
                 TaskDto taskDto = gson.fromJson(body, TaskDto.class);
                 Task task = TaskMapper.createTask(taskDto);
                 if (id == 0) {
-                    fileBackedTaskManager.createTask(Status.NEW, task);
+                    taskManager.createTask(Status.NEW, task);
                 } else {
-                    fileBackedTaskManager.updateTask(id, task);
+                    taskManager.updateTask(id, task);
                 }
-                if (fileBackedTaskManager.getCompletionStatus()) {
+
+                if (taskManager.getCompletionStatus()) {
                     rCode = 201;
                 } else {
                     rCode = 406;
@@ -110,13 +112,14 @@ public class TaskManagerHandler implements HttpHandler {
                 break;
             case "subtasks":
                 SubtaskDto subtaskDto = gson.fromJson(body, SubtaskDto.class);
-                Subtask subtask = TaskMapper.createSubtask(subtaskDto, fileBackedTaskManager.getEpic(subtaskDto.getEpicId()));
+                Subtask subtask = TaskMapper.createSubtask(subtaskDto, taskManager.getEpic(subtaskDto.getEpicId()));
                 if (id == 0) {
-                    fileBackedTaskManager.createSubtask(subtask.getEpic(), Status.NEW, subtask);
+                    taskManager.createSubtask(subtask.getEpic(), Status.NEW, subtask);
                 } else {
-                    fileBackedTaskManager.updateSubtask(id, subtask);
+                    taskManager.updateSubtask(id, subtask);
                 }
-                if (fileBackedTaskManager.getCompletionStatus()) {
+
+                if (taskManager.getCompletionStatus()) {
                     rCode = 201;
                 } else {
                     rCode = 406;
@@ -126,11 +129,12 @@ public class TaskManagerHandler implements HttpHandler {
                 EpicDto epicDto = gson.fromJson(body, EpicDto.class);
                 Epic epic = TaskMapper.createEpic(epicDto);
                 if (id == 0) {
-                    fileBackedTaskManager.createEpic(Status.NEW, epic);
+                    taskManager.createEpic(Status.NEW, epic);
                 } else {
-                    fileBackedTaskManager.updateEpic(id, epic);
+                    taskManager.updateEpic(id, epic);
                 }
-                if (fileBackedTaskManager.getCompletionStatus()) {
+
+                if (taskManager.getCompletionStatus()) {
                     rCode = 201;
                 } else {
                     rCode = 406;
@@ -161,14 +165,15 @@ public class TaskManagerHandler implements HttpHandler {
         switch (typeOfTask) {
             case "tasks":
                 if (id > 0) {
-                    fileBackedTaskManager.removeTaskById(id);
+                    taskManager.removeTaskById(id);
                 } else if (id == 0) {
-                    fileBackedTaskManager.removeAllTasks();
+                    taskManager.removeAllTasks();
                 } else {
                     rCode = 404;
                     break;
                 }
-                if (fileBackedTaskManager.getCompletionStatus()) {
+
+                if (taskManager.getCompletionStatus()) {
                     rCode = 201;
                 } else {
                     rCode = 404;
@@ -176,17 +181,19 @@ public class TaskManagerHandler implements HttpHandler {
                 break;
             case "subtasks":
                 if (id > 0) {
-                    fileBackedTaskManager.removeSubtaskById(id);
+                    taskManager.removeSubtaskById(id);
                 } else {
-                    Epic epic = fileBackedTaskManager.getEpic(idEpic);
+                    Epic epic = taskManager.getEpic(idEpic);
+
                     if (epic != null) {
-                        fileBackedTaskManager.removeAllSubtasks(epic);
+                        taskManager.removeAllSubtasks(epic);
                     } else {
                         rCode = 404;
                         break;
                     }
                 }
-                if (fileBackedTaskManager.getCompletionStatus()) {
+
+                if (taskManager.getCompletionStatus()) {
                     rCode = 201;
                 } else {
                     rCode = 404;
@@ -194,14 +201,15 @@ public class TaskManagerHandler implements HttpHandler {
                 break;
             case "epics":
                 if (id > 0) {
-                    fileBackedTaskManager.removeEpicById(id);
+                    taskManager.removeEpicById(id);
                 } else if (id == 0) {
-                    fileBackedTaskManager.removeAllEpics();
+                    taskManager.removeAllEpics();
                 } else {
                     rCode = 404;
                     break;
                 }
-                if (fileBackedTaskManager.getCompletionStatus()) {
+
+                if (taskManager.getCompletionStatus()) {
                     rCode = 201;
                 } else {
                     rCode = 404;
@@ -233,9 +241,10 @@ public class TaskManagerHandler implements HttpHandler {
             case "tasks":
                 if (stringId.isBlank()) {
                     rCode = 200;
-                    return TaskMapper.createListTasksDto(fileBackedTaskManager.getListTasks());
+                    return TaskMapper.createListTasksDto(taskManager.getListTasks());
                 } else {
-                    Optional<Task> task = fileBackedTaskManager.getTaskById(id);
+                    Optional<Task> task = taskManager.getTaskById(id);
+
                     if (task.isPresent()) {
                         rCode = 200;
                         return List.of(TaskMapper.createTaskDto(task.get()));
@@ -246,8 +255,9 @@ public class TaskManagerHandler implements HttpHandler {
                 }
             case "subtasks":
                 if (id < 0) {
-                    Epic epic = fileBackedTaskManager.getEpic(idEpic);
-                    Optional<List<Subtask>> subtasks = fileBackedTaskManager.getListSubtasks(epic);
+                    Epic epic = taskManager.getEpic(idEpic);
+                    Optional<List<Subtask>> subtasks = taskManager.getListSubtasks(epic);
+
                     if (subtasks.isPresent()) {
                         rCode = 200;
                         return TaskMapper.createListTasksDto(subtasks.get());
@@ -255,8 +265,10 @@ public class TaskManagerHandler implements HttpHandler {
                         rCode = 404;
                         return null;
                     }
+
                 } else {
-                    Optional<Subtask> subtask = fileBackedTaskManager.getSubtaskById(id);
+                    Optional<Subtask> subtask = taskManager.getSubtaskById(id);
+
                     if (subtask.isPresent()) {
                         rCode = 200;
                         return List.of(TaskMapper.createSubtaskDto(subtask.get()));
@@ -268,9 +280,10 @@ public class TaskManagerHandler implements HttpHandler {
             case "epics":
                 if (stringId.isBlank()) {
                     rCode = 200;
-                    return TaskMapper.createListTasksDto(fileBackedTaskManager.getListEpics());
+                    return TaskMapper.createListTasksDto(taskManager.getListEpics());
                 } else {
-                    Optional<Epic> epic = fileBackedTaskManager.getEpicById(id);
+                    Optional<Epic> epic = taskManager.getEpicById(id);
+
                     if (epic.isPresent()) {
                         rCode = 200;
                         return List.of(TaskMapper.createEpicDto(epic.get()));
@@ -281,10 +294,10 @@ public class TaskManagerHandler implements HttpHandler {
                 }
             case "history":
                 rCode = 200;
-                return TaskMapper.createListTasksDto(fileBackedTaskManager.getHistory());
+                return TaskMapper.createListTasksDto(taskManager.getHistory());
             case "prioritized":
                 rCode = 200;
-                return TaskMapper.createListTasksDto(fileBackedTaskManager.getPrioritizedTasks());
+                return TaskMapper.createListTasksDto(taskManager.getPrioritizedTasks());
             default:
                 rCode = 404;
                 return null;
@@ -292,6 +305,6 @@ public class TaskManagerHandler implements HttpHandler {
     }
 
     public void setTaskManager(TaskManager taskManager) {
-        this.fileBackedTaskManager = taskManager;
+        this.taskManager = taskManager;
     }
 }

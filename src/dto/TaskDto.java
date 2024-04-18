@@ -8,11 +8,11 @@ import java.util.Objects;
 
 public class TaskDto {
     protected String typeOfTask;
-    private final String description;
-    private final int id;
-    private final Status status;
-    private final Duration duration;
-    private final LocalDateTime startTime;
+    private String description;
+    private int id;
+    private Status status;
+    private Duration duration;
+    private LocalDateTime startTime;
 
     public TaskDto(String description, int id, Status status, Duration duration, LocalDateTime startTime) {
         this.typeOfTask = "Task";

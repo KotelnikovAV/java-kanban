@@ -7,8 +7,8 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 public class SubtaskDto extends TaskDto {
-    String descriptionEpic;
-    int epicId;
+    private String descriptionEpic;
+    private int epicId;
 
     public SubtaskDto(String description, int id, Status status, Duration duration,
                       LocalDateTime startTime, Epic epic) {

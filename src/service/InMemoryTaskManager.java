@@ -5,11 +5,11 @@ import model.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static util.TaskMapper.DATE_TIME_FORMATTER;
+
 public class InMemoryTaskManager implements TaskManager {
-    protected static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm dd.MM.yy");
     private static final double REDUCTION_FACTOR = 0.8;
 
     private final List<Task> listTasks;

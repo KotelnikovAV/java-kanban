@@ -14,15 +14,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TaskMapper {
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm dd.MM.yy");
+    public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm dd.MM.yy");
 
     public static TaskDto createTaskDto(Task task) {
         return new TaskDto(task.getTask(), task.getId(), task.getStatus(),
                 Duration.ofMinutes(Integer.parseInt(task.getDurationTask())),
                 LocalDateTime.parse(task.getStartTime(), DATE_TIME_FORMATTER));
-        /* Изначально было бы лучше, если бы конструктор задач принимал не строки, а уже готовые объекты LocalDateTime
-        и Dutation, а методы get возвращали бы соответствующие объекты. Тогда во многих местах код выглядел бы более
-        простым. Однако, сейчас вносить изменения уже достаточно сложно. Будет время - исправлю. */
     }
 
     public static EpicDto createEpicDto(Epic epic) {
