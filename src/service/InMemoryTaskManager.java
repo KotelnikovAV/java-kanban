@@ -5,11 +5,11 @@ import model.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static util.TaskMapper.DATE_TIME_FORMATTER;
+
 public class InMemoryTaskManager implements TaskManager {
-    protected static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm dd.MM.yy");
     private static final double REDUCTION_FACTOR = 0.8;
 
     private final List<Task> listTasks;
@@ -19,6 +19,7 @@ public class InMemoryTaskManager implements TaskManager {
     protected Map<LocalDateTime, Boolean> takenInterval;
     protected final HistoryManager inMemoryHistoryManager;
     private int counterId;
+    private boolean completionStatus;
 
     public InMemoryTaskManager() {
         listTasks = new ArrayList<>();
@@ -27,6 +28,7 @@ public class InMemoryTaskManager implements TaskManager {
         takenInterval = new HashMap<>();
         inMemoryHistoryManager = Managers.getHistoryManager();
         counterId = 0;
+        completionStatus = false;
         tasksByPriority = new TreeSet<>((task1, task2) -> {
             if (LocalDateTime.parse(task1.getStartTime(), DATE_TIME_FORMATTER)
                     .isAfter(LocalDateTime.parse(task2.getStartTime(), DATE_TIME_FORMATTER))) {
@@ -51,9 +53,11 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void createTask(Status status, Task task) {
         if ((task.getClass() != Task.class) || (listTasks.contains(task))) {
+            completionStatus = false;
             return;
         }
         if (!addTakenInterval(task)) {
+            completionStatus = false;
             return;
         }
         counterId++;
@@ -61,25 +65,30 @@ public class InMemoryTaskManager implements TaskManager {
         task.setStatus(status);
         listTasks.add(task);
         tasksByPriority.add(task);
+        completionStatus = true;
     }
 
     @Override
     public void createEpic(Status status, Epic epic) {
         if (listEpics.contains(epic)) {
+            completionStatus = false;
             return;
         }
         counterId++;
         epic.setId(counterId);
         epic.setStatus(status);
         listEpics.add(epic);
+        completionStatus = true;
     }
 
     @Override
     public void createSubtask(Epic epic, Status status, Subtask subtask) {
         if (listSubtasks.contains(subtask)) {
+            completionStatus = false;
             return;
         }
         if (!addTakenInterval(subtask)) {
+            completionStatus = false;
             return;
         }
         counterId++;
@@ -89,7 +98,7 @@ public class InMemoryTaskManager implements TaskManager {
         tasksByPriority.add(subtask);
         epic.addSubtask(subtask);
         updateTimeValuesOfEpic(epic);
-        tasksByPriority.add(epic);
+        completionStatus = true;
     }
 
     @Override
@@ -176,6 +185,8 @@ public class InMemoryTaskManager implements TaskManager {
             copyEpic.setId(epicById.get().getId());
             copyEpic.setStatus(epicById.get().getStatus());
             copyEpic.getSubtasks().addAll(epicById.get().getSubtasks());
+            copyEpic.setDuration();
+            copyEpic.setStartTime();
             return Optional.of(copyEpic);
         } else {
             return Optional.empty();
@@ -205,12 +216,16 @@ public class InMemoryTaskManager implements TaskManager {
             removeTakenInterval(taskFromList);
             if (!addTakenInterval(task)) {
                 addTakenInterval(taskFromList);
+                completionStatus = false;
                 return;
             }
             taskFromList.setTask(task.getTask());
             taskFromList.setStatus(task.getStatus());
             taskFromList.setStartTime(task.getStartTime());
             taskFromList.setDuration(task.getDurationTask());
+            completionStatus = true;
+        } else {
+            completionStatus = false;
         }
     }
 
@@ -219,15 +234,17 @@ public class InMemoryTaskManager implements TaskManager {
         Optional<Epic> epicById = listEpics.stream().filter(epic1 -> epic1.getId() == id).findFirst();
         if (epicById.isPresent()) {
             Epic epicFromList = epicById.get();
-            removeTakenInterval(epicFromList);
-            if (!addTakenInterval(epic)) {
-                addTakenInterval(epicFromList);
-                return;
-            }
             epicFromList.setTask(epic.getTask());
             epicFromList.setStatus(epic.getStatus());
-            epicFromList.setStartTime(epic.getStartTime());
-            epicFromList.setDuration(epic.getDurationTask());
+            try {
+                epicFromList.setStartTime(epic.getStartTime());
+                epicFromList.setDuration(epic.getDurationTask());
+                completionStatus = true;
+            } catch (NullPointerException e) {
+                completionStatus = true;
+            }
+        } else {
+            completionStatus = false;
         }
     }
 
@@ -242,6 +259,7 @@ public class InMemoryTaskManager implements TaskManager {
             updateTimeValuesOfEpic(epic);
             if (!addTakenInterval(epic)) {
                 addTakenInterval(subtaskFromList.getEpic());
+                completionStatus = false;
                 return;
             }
             subtaskFromList.setTask(subtask.getTask());
@@ -249,6 +267,9 @@ public class InMemoryTaskManager implements TaskManager {
             subtaskFromList.setStartTime(subtask.getStartTime());
             subtaskFromList.setDuration(subtask.getDurationTask());
             updateTimeValuesOfEpic(subtaskById.get().getEpic());
+            completionStatus = true;
+        } else {
+            completionStatus = false;
         }
     }
 
@@ -260,6 +281,9 @@ public class InMemoryTaskManager implements TaskManager {
             inMemoryHistoryManager.remove(id);
             tasksByPriority.remove(taskById.get());
             removeTakenInterval(taskById.get());
+            completionStatus = true;
+        } else {
+            completionStatus = false;
         }
     }
 
@@ -272,6 +296,9 @@ public class InMemoryTaskManager implements TaskManager {
             tasksByPriority.remove(epicById.get());
             inMemoryHistoryManager.remove(id);
             removeTakenInterval(epicById.get());
+            completionStatus = true;
+        } else {
+            completionStatus = false;
         }
     }
 
@@ -284,6 +311,9 @@ public class InMemoryTaskManager implements TaskManager {
             inMemoryHistoryManager.remove(id);
             tasksByPriority.remove(subtaskById.get());
             updateTimeValuesOfEpic(subtaskById.get().getEpic());
+            completionStatus = true;
+        } else {
+            completionStatus = false;
         }
     }
 
@@ -333,6 +363,23 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public List<Task> getPrioritizedTasks() {
         return List.copyOf(tasksByPriority);
+    }
+
+    @Override
+    public boolean getCompletionStatus() {
+        return completionStatus;
+    }
+
+    @Override
+    public Epic getEpic(int id) {
+        Optional<Epic> epicById = listEpics.stream().filter(epic -> epic.getId() == id).findFirst();
+        if (epicById.isPresent()) {
+            completionStatus = true;
+            return epicById.get();
+        } else {
+            completionStatus = false;
+            return null;
+        }
     }
 
     public boolean addTakenInterval(Task task) {
